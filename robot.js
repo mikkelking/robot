@@ -8,10 +8,10 @@ let robot = function() {
 
 	// Set the bounds of the table
 	let table = {
-		minX: 1,
-		minY: 1,
-		maxX: 5,
-		maxY: 5
+		minX: 0,
+		minY: 0,
+		maxX: 4,
+		maxY: 4
 	},
 
 	// Information about the robot's current location and direction
@@ -19,15 +19,25 @@ let robot = function() {
 		onTable: false,
 		x: 0,
 		y: 0,
-		facing: 'NORTH'
+		facing: 'NORTH',
+		debug: false
 	},
 
 	moves = {
-		NORTH: {deltaX:  0, deltaY:  1, left: 'EAST', right: 'WEST'},
-		SOUTH: {deltaX:  0, deltaY: -1, left: 'WEST', right: 'EAST'},
-		EAST: {deltaX: -1, deltaY:  0, left: 'SOUTH', right: 'NORTH'},
-		WEST: {deltaX:  1, deltaY:  0, left: 'NORTH', right: 'SOUTH'}
+		NORTH: {deltaX:  0, deltaY:  1, left: 'WEST', right: 'EAST'},
+		SOUTH: {deltaX:  0, deltaY: -1, left: 'EAST', right: 'WEST'},
+		WEST: {deltaX: -1, deltaY:  0, left: 'SOUTH', right: 'NORTH'},
+		EAST: {deltaX:  1, deltaY:  0, left: 'NORTH', right: 'SOUTH'}
 	},
+
+// Commands that we will accept, and how to parse them
+	cmdList = [
+		{command: "place",  regex: /\s*place\s*([-]*\d+)[,\s]+([-]*\d+)[,\s]+(\w*)\s*$/i},
+		{command: "move",   regex: /\s*move\s*$/i},
+		{command: "left",   regex: /\s*left\s*$/i},
+		{command: "right",  regex: /\s*right\s*$/i},
+		{command: "report", regex: /\s*report\s*$/i}
+	],
 
 	params = [],
 
@@ -36,7 +46,7 @@ let robot = function() {
 // Private methods
 //
 	tryMoveTo = function(newX,newY) {
-		console.log("tryMoveTo()",newX,newY);
+		debug("tryMoveTo()",newX,newY);
 		let success = true;
 		if (newX > table.maxX || newX < table.minX) {
 			success = false;
@@ -47,13 +57,35 @@ let robot = function() {
 		return success;
 	},
 
+	debug = function(msg) {
+		if (state.debug)
+			console.log(msg);
+	},
+
+	parseInput = function(input) {
+		debug("command="+input);
+		let result = {};
+		_.each(cmdList,cmd => {
+			let match = cmd.regex.exec(input);
+			if (match) {
+				debug(match);
+				result.command = cmd.command;
+				match.shift();
+				result.params = match;
+				return false;
+			}
+		});
+		if (!result.command)
+			result.command = 'unknown';
+		return result;
+	},
 
 // - - - - - - - - - - - - - - - - - - - - - -
 //
 // Public methods
 //
 	placeme = function(newX, newY, facing) {
-		console.log("Placing at ",newX,newY,facing);
+		debug("Placing at ",newX,newY,facing);
 		let success = tryMoveTo(newX, newY);
 		if (!success) {
 			let msg = texts.MSG_THAT_IS_OFF_TABLE;
@@ -102,8 +134,38 @@ let robot = function() {
 		if (!state.onTable)
 			return {status: "error", message: texts.NOT_ON_TABLE};
 		let msg = "X: " + state.x + ", Y: " + state.y + ", facing: "+state.facing;
-		console.log(msg);
+		debug(msg);
 		return {status: "ok", message: msg};
+	},
+
+	doCommand = function(line) {
+		let cmd = parseInput(line);
+		debug(texts.COMMAND_IS,cmd.command);
+		let result;
+	  switch(cmd.command) {
+	    case 'place':
+	    	result = robot.place(cmd.params[0],cmd.params[1],cmd.params[2]);
+	      break;
+	    case 'left':
+	    	result = robot.left();
+	      break;
+	    case 'right':
+	    	result = robot.right();
+	      break;
+	    case 'move':
+	    	result = robot.move();
+	      break;
+	    case 'report':
+	    	result = robot.report();
+	      break;
+	    case 'quit':
+	    	quit();
+	      break;
+	    default:
+	      result = {status: "error", message: texts.NON_CAPISCE + line.trim() + "'"};
+	      break;
+	  }
+	  return result;
 	};
 
 	return {
@@ -111,7 +173,8 @@ let robot = function() {
 		right: right,
 		move: moveme,
 		place: placeme,
-		report: report
+		report: report,
+		do: doCommand
 	};
 
 }();

@@ -3,7 +3,7 @@
 //
 module.exports = {
 
-	MSG_THAT_IS_OFF_TABLE: "Please put me on the table",
+	MSG_THAT_IS_OFF_TABLE: "That place is not on the table",
 	MSG_FALL_OFF_TABLE_PRE: "I'm sorry, moving ",
 	MSG_FALL_OFF_TABLE_POST: " would make me fall off the edge of the table",
 	COMMAND_PROMPT: 		"YES MASTER> ",

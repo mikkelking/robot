@@ -3,6 +3,15 @@
 
 const _ = require('lodash');
 const readline = require('readline');
+const minimist = require('minimist');
+
+// the "opts" object will contain all the command line parameters and options
+// So the first parameter will be in the opts._ array, eg the first one will be in opts._[0]
+// eg if run with --debug, then opts.debug will be true
+// Supported switches:
+// 		--debug - shows debug output
+//		--overwrite - set to overwrite data every time
+let opts = minimist(process.argv.slice(2));
 
 const texts = require('./texts');
 const robot = require('./robot');
@@ -10,7 +19,7 @@ const robot = require('./robot');
 
 // Commands that we will accept, and how to parse them
 let cmdList = [
-	{command: "place",  regex: /\s*place\s*(\d+)[,\s]+(\d+)[,\s]+(\w*)\s*$/},
+	{command: "place",  regex: /\s*place\s*([-]*\d+)[,\s]+([-]*\d+)[,\s]+(\w*)\s*$/},
 	{command: "move",   regex: /\s*move\s*$/},
 	{command: "left",   regex: /\s*left\s*$/},
 	{command: "right",  regex: /\s*right\s*$/},
@@ -25,12 +34,23 @@ function quit() {
   rl.close();
 }
 
+function debug(msg) {
+	if (opts.debug)
+		console.log(msg);
+}
+
+// Command responses sent here
+function respond(msg) {
+	console.log(msg);
+}
+
+
 function parseInput(input) {
 	let result = {};
 	_.each(cmdList,cmd => {
 		let match = cmd.regex.exec(input);
 		if (match) {
-			console.log(match);
+			debug(match);
 			result.command = cmd.command;
 			match.shift();
 			result.params = match;
@@ -56,7 +76,7 @@ rl.prompt();
 
 rl.on('line', (line) => {
 	let cmd = parseInput(line);
-	console.log(texts.COMMAND_IS,cmd.command);
+	debug(texts.COMMAND_IS,cmd.command);
 	let result;
   switch(cmd.command) {
     case 'place':
@@ -74,7 +94,7 @@ rl.on('line', (line) => {
     case 'report':
     	result = robot.report();
 		  if (!result.error)
-    		console.log(result.message);
+    		respond(result.message);
       break;
     case 'quit':
     	quit();
@@ -84,11 +104,11 @@ rl.on('line', (line) => {
       break;
   }
   if (result.status === "error")
-  	console.log("Error: "+result.message);
+  	respond("Error: "+result.message);
   else 
-  	console.log("ok"); 
+  	respond("ok"); 
   rl.prompt();
 }).on('close', () => {
-  console.log(texts.THANKS);
+  respond(texts.THANKS);
   process.exit(0);
 });
