@@ -36,7 +36,9 @@ let robot = function() {
 		{command: "move",   regex: /\s*move\s*$/i},
 		{command: "left",   regex: /\s*left\s*$/i},
 		{command: "right",  regex: /\s*right\s*$/i},
-		{command: "report", regex: /\s*report\s*$/i}
+		{command: "report", regex: /\s*report\s*$/i},
+		{command: "reset",  regex: /\s*reset\s*$/i},
+		{command: "status", regex: /\s*status\s*$/i}
 	],
 
 	params = [],
@@ -138,6 +140,18 @@ let robot = function() {
 		return {status: "ok", message: msg};
 	},
 
+	status = function() {
+		return {status: "ok", onTable: state.onTable, x: state.x, y: state.y, facing: state.facing};
+	},
+
+	reset = function() {
+		state.onTable = false;
+		state.x = 0;
+		state.y = 0;
+		state.facing = "NORTH";
+		return {status: "ok"};
+	},
+
 	doCommand = function(line) {
 		let cmd = parseInput(line);
 		debug(texts.COMMAND_IS,cmd.command);
@@ -158,6 +172,12 @@ let robot = function() {
 	    case 'report':
 	    	result = robot.report();
 	      break;
+	    case 'status':
+	    	result = robot.status();
+	      break;
+	    case 'reset':
+	    	result = robot.reset();
+	      break;
 	    case 'quit':
 	    	quit();
 	      break;
@@ -174,6 +194,8 @@ let robot = function() {
 		move: moveme,
 		place: placeme,
 		report: report,
+		status: status,
+		reset: reset,
 		do: doCommand
 	};
 
