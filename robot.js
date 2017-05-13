@@ -160,7 +160,7 @@ let robot = function() {
 	report = function() {
 		if (!state.onTable)
 			return {status: "error", message: texts.NOT_ON_TABLE};
-		let msg = "X: " + state.x + ", Y: " + state.y + ", facing: "+state.facing;
+		let msg = state.x + "," + state.y + "," + state.facing;
 		debug(msg);
 		return {status: "ok", message: msg};
 	},
