@@ -18,6 +18,9 @@ let opts = minimist(process.argv.slice(2));
 const texts = require('./texts');
 const robot = require('./robot');
 
+//
+// Sets of command sequences for tests. Each set has an expected end status
+//
 let sets = [
 	{
 	name: "1",
@@ -87,6 +90,10 @@ let sets = [
 	}
 
 ];
+
+//
+// Iterate through the test sets, sending commands 
+//
 _.each(sets,s => {
 	describe("Results of command sequence "+s.name, function() {
 		_.each(s.commands, c => {
@@ -95,7 +102,7 @@ _.each(sets,s => {
 			console.log("RESPONSE: ",response);
 		});
 
-	// Now check the result
+	// Now check the results and do the assertions
 
 		let current = robot.status();
 		let same = true;

@@ -23,6 +23,17 @@ let robot = function() {
 		debug: false
 	},
 
+	directions = {
+		N: 'NORTH',
+		S: 'SOUTH',
+		E: 'EAST',
+		W: 'WEST',
+		NORTH: 'NORTH',
+		SOUTH: 'SOUTH',
+		EAST: 'EAST',
+		WEST: 'WEST'
+	},
+
 	moves = {
 		NORTH: {deltaX:  0, deltaY:  1, left: 'WEST', right: 'EAST'},
 		SOUTH: {deltaX:  0, deltaY: -1, left: 'EAST', right: 'WEST'},
@@ -50,6 +61,14 @@ let robot = function() {
 	tryMoveTo = function(newX,newY) {
 		debug("tryMoveTo()",newX,newY);
 		let success = true;
+		if (!Number.isInteger(parseInt(newX,10))) {
+			console.error(newX+" is not a number");
+			return false;
+		}
+		if (!Number.isInteger(parseInt(newY))) {
+			console.error(newY+" is not a number");
+			return false;
+		}
 		if (newX > table.maxX || newX < table.minX) {
 			success = false;
 		}
@@ -92,11 +111,17 @@ let robot = function() {
 		if (!success) {
 			let msg = texts.MSG_THAT_IS_OFF_TABLE;
 			return {status: "error", message: msg};
-		}
-		else {
+		} else {
+//
+// Check if the direction is valid by finding it in the directions lookup
+//
+			if (!directions[facing.toUpperCase()]) {
+				let msg = texts.MSG_THAT_IS_BAD_DIRECTION;
+				return {status: "error", message: msg};
+			}
 			state.x = parseInt(newX,10);
 			state.y = parseInt(newY,10);
-			state.facing = facing.toUpperCase();
+			state.facing = directions[facing.toUpperCase()];
 			state.onTable = true;
 		}
 		return {status: "ok"};
@@ -188,6 +213,9 @@ let robot = function() {
 	  return result;
 	};
 
+//
+// These are the public methdds available on the robot object
+//
 	return {
 		left: left,
 		right: right,

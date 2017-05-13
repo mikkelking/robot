@@ -17,15 +17,6 @@ const texts = require('./texts');
 const robot = require('./robot');
 
 
-// Commands that we will accept, and how to parse them
-let cmdList = [
-	{command: "place",  regex: /\s*place\s*([-]*\d+)[,\s]+([-]*\d+)[,\s]+(\w*)\s*$/},
-	{command: "move",   regex: /\s*move\s*$/},
-	{command: "left",   regex: /\s*left\s*$/},
-	{command: "right",  regex: /\s*right\s*$/},
-	{command: "report", regex: /\s*report\s*$/}
-];
-
 // - - - - - - - - - - - - - - - - - - - - 
 // Functions
 // 
@@ -45,23 +36,6 @@ function respond(msg) {
 }
 
 
-function parseInput(input) {
-	let result = {};
-	_.each(cmdList,cmd => {
-		let match = cmd.regex.exec(input);
-		if (match) {
-			debug(match);
-			result.command = cmd.command;
-			match.shift();
-			result.params = match;
-			return false;
-		}
-	});
-	if (!result.command)
-		result.command = 'unknown';
-	return result;
-}
-
 
 // - - - - - - - - - - - - - - - - - - - - 
 // Main code
@@ -75,38 +49,17 @@ const rl = readline.createInterface({
 rl.prompt();
 
 rl.on('line', (line) => {
-	let cmd = parseInput(line);
-	debug(texts.COMMAND_IS,cmd.command);
-	let result;
-  switch(cmd.command) {
-    case 'place':
-    	result = robot.place(cmd.params[0],cmd.params[1],cmd.params[2]);
-      break;
-    case 'left':
-    	result = robot.left();
-      break;
-    case 'right':
-    	result = robot.right();
-      break;
-    case 'move':
-    	result = robot.move();
-      break;
-    case 'report':
-    	result = robot.report();
-		  if (!result.error)
-    		respond(result.message);
-      break;
-    case 'quit':
-    	quit();
-      break;
-    default:
-      result = {status: "error", message: texts.NON_CAPISCE + line.trim() + "'"};
-      break;
-  }
-  if (result.status === "error")
-  	respond("Error: "+result.message);
-  else 
-  	respond("ok"); 
+	if (line.match(/quit/i))
+		return quit();
+	try {
+		let result = robot.do(line);
+		if (line.match(/report/i))
+			respond(result.message);
+	  if (result.status === "error")
+	  	respond("Error: "+result.message);
+	} catch(e) {
+		console.error("Exception",e);
+	}
   rl.prompt();
 }).on('close', () => {
   respond(texts.THANKS);

@@ -4,7 +4,9 @@
   "description": "Table top robot assignment",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "robot": "node index.js",
+    "test": "mocha test.js"
   },
   "author": "Mike King",
   "license": "MIT",

@@ -4,6 +4,7 @@
 module.exports = {
 
 	MSG_THAT_IS_OFF_TABLE: "That place is not on the table",
+	MSG_THAT_IS_BAD_DIRECTION: "I don't know that directon",
 	MSG_FALL_OFF_TABLE_PRE: "I'm sorry, moving ",
 	MSG_FALL_OFF_TABLE_POST: " would make me fall off the edge of the table",
 	COMMAND_PROMPT: 		"YES MASTER> ",
